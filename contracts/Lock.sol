@@ -31,6 +31,28 @@ contract Lock {
 
         owner.transfer(address(this).balance);
     }
+    
+     struct Person{
+        uint id;
+        string name;
+        uint age;
+    }
+
+
+    mapping (uint => Person) public Persons;
+    uint public memberCount=0;
+
+
+    function updateperson(string memory name, uint age)public{
+        Persons[memberCount] = Person(memberCount,name,age);
+        memberCount++;
+    }
+
+    //return Single structure
+    function get(uint _memberId) public view returns(Person memory) {
+    return Persons[_memberId];
+    }
+   
 }
 
 // contract Greeter {

@@ -6,8 +6,15 @@ import Lock from "./artifacts/contracts/Lock.sol/Lock.json";
 const greeterAdd = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const App = () => {
-  const [msg, setMsg] = useState("");
-  console.log(msg, "msg");
+  const [msg, setMsg] = useState({});
+  const [callId,setCallId]= useState(0)
+  // console.log(msg, "msg");
+
+  const onFormChage=(e)=>{
+    let id = e.target.id
+    let val=e.target.value
+     setMsg({...msg,[id]:val})
+  }
 
   const requestAccount = async () => {
     const acc = await window.ethereum.request({
@@ -15,6 +22,7 @@ const App = () => {
     });
     console.log(acc, "acc");
   };
+
   const fetchGreeting = async () => {
     if (
       typeof window.ethereum !== "undefined" ||
@@ -22,62 +30,71 @@ const App = () => {
     ) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      console.log("----", signer);
       const contract = new ethers.Contract(greeterAdd, Lock.abi, signer);
-      console.log(contract, "provider");
+      try{
+        const data = await contract.get(callId);
+        console.log(data.toString(),'data');
+      }catch(error){
+        console.log(error,'error');
+      }
     }
-    // if (typeof window.ethereum !== "undefined") {
-    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-    //   const singer = provider.getSigner();
-    //   console.log(singer, "sifsdf");
-    //   // const contract = new ethers.Contract(greeterAdd, Lock.abi, provider);
-    //   // console.log(provider,'provider');
-    //   // try{
-    //   //   // const data =await contract.greet;
-    //   //   console.log(data,'data');
-    //   // }catch(error){
-    //   //   console.log(error,'error');
-    //   // }
-    // }
   };
-  console.log(window.ethereum, "window.ethereum");
   const setGreet = async () => {
     if (!msg) return;
 
     if (typeof window.ethereum !== "undefined") {
+      const{userName,userAge}=msg
       await requestAccount();
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const singer = provider.getSigner();
-      const contract = new ethers.Contract(greeterAdd, Lock.abi, provider);
-      const sign = singer.signMessage("Wellcome");
+      const contract = new ethers.Contract(greeterAdd, Lock.abi, singer);
+      
+      try{
+        const data = await contract.updateperson(userName,userAge)
+        console.log(data,'data');
+      }catch(error){
+        console.log(error,'error');
+      }
     }
   };
 
   return (
     <div className="w-full h-screen  flex justify-center items-center">
-      <Card className="w-1/2 h-fit ">
-        <div className="flex justify-center gap-x-10">
+      <Card className="w-1/2 h-fit  ">
+       <TextInput
+          id="callId"
+          placeholder="Id"
+          onChange={(e) => setCallId(e.target.value)}
+          className=" w-3/4 self-center"
+        />
           <Button
-            className=" w-3/12 "
+            className=" w-3/12 self-center "
             gradientDuoTone="purpleToPink"
             onClick={fetchGreeting}
           >
             fetchGreet
           </Button>
+        
+        <TextInput
+          id="userName"
+          placeholder="Name"
+          onChange={(e) => onFormChage(e)}
+          className=" w-3/4 self-center"
+        />
+        <TextInput
+          id="userAge"
+          placeholder="Age"
+          onChange={(e) => onFormChage(e)}
+          className=" w-3/4 self-center"
+        />
           <Button
-            className=" w-3/12 "
+            className=" w-3/12 self-center "
             gradientDuoTone="tealToLime"
-            onClick={requestAccount}
+            onClick={setGreet}
           >
             setGreet{" "}
           </Button>
-        </div>
-        <TextInput
-          placeholder="getMessage"
-          value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          className=" w-3/4 self-center"
-        />
+        
       </Card>
     </div>
   );
